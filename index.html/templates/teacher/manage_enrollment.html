@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Manage Enrollment{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-1 flex-wrap gap-2">
+    <div>
+        <h4 class="mb-1">Manage Enrollment &mdash; {{ subject.name }}</h4>
+        <p class="text-muted mb-3">{{ enrolled_count }} student(s) currently enrolled.</p>
+    </div>
+    <a href="{{ url_for('bulk_add_students', subject_id=subject.id) }}" class="btn btn-outline-primary">
+        <i class="bi bi-people-fill"></i> Bulk Add New Students to This Subject
+    </a>
+</div>
+
+<form method="GET" class="row g-2 mb-3">
+    <div class="col-md-5">
+        <input type="text" name="q" class="form-control" placeholder="Search by name or username" value="{{ search }}">
+    </div>
+    <div class="col-md-4">
+        <select name="level" class="form-select" onchange="this.form.submit()">
+            <option value="">All Grade Levels</option>
+            {% for value, label in level_choices %}
+                <option value="{{ value }}" {% if level_filter == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+    </div>
+</form>
+
+<div class="card p-3">
+    <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Name</th><th>Grade Level</th><th>Username</th><th></th></tr></thead>
+        <tbody>
+        {% for s in students %}
+            <tr>
+                <td>{{ s.full_name }}</td>
+                <td><span class="badge bg-secondary">{{ s.grade_level_label() }}</span></td>
+                <td>{{ s.username }}</td>
+                <td>
+                    {% if s.id in enrolled_ids %}
+                        <form method="POST" action="{{ url_for('subject_unenroll_student', subject_id=subject.id, level=level_filter, q=search) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="student_id" value="{{ s.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Remove</button>
+                        </form>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('subject_enroll_student', subject_id=subject.id, level=level_filter, q=search) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="student_id" value="{{ s.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-success"><i class="bi bi-plus-circle"></i> Enroll</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr><td colspan="4" class="text-muted text-center">No students found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{{ url_for('admin_subjects') if current_user.is_admin() else url_for('teacher_dashboard') }}" class="btn btn-link mt-3">Back to Subjects</a>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Students{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">Manage Students</h3>
+    <a href="{{ url_for('bulk_add_students') }}" class="btn btn-outline-primary"><i class="bi bi-people-fill"></i> Bulk Add Students</a>
+</div>
+<div class="row g-4">
+    <div class="col-md-5">
+        <div class="card p-3">
+            <h5>Create Student Account</h5>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-2">
+                    {{ form.full_name.label(class="form-label") }}
+                    {{ form.full_name(class="form-control") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.grade_level.label("Grade Level", class="form-label") }}
+                    {{ form.grade_level(class="form-select") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control") }}
+                </div>
+                <button class="btn btn-primary w-100" type="submit"><i class="bi bi-plus-circle"></i> Create Student</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <div class="card p-3">
+            <h5>All Students ({{ students|length }})</h5>
+            <table class="table table-hover align-middle mt-2">
+                <thead><tr><th>Name</th><th>Grade Level</th><th>Username</th><th>Email</th></tr></thead>
+                <tbody>
+                {% for s in students %}
+                    <tr><td>{{ s.full_name }}</td><td><span class="badge bg-secondary">{{ s.grade_level_label() }}</span></td><td>{{ s.username }}</td><td>{{ s.email or '—' }}</td></tr>
+                {% else %}
+                    <tr><td colspan="4" class="text-muted text-center">No students yet.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

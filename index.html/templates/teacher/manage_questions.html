@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Manage Questions{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-1">
+    <h4 class="mb-0">Test Questionnaire &mdash; {{ subject.name }}</h4>
+</div>
+<p class="text-muted">
+    {{ questions|length }} question(s) loaded
+    {% if questions|length < questions_per_exam %}
+        &middot; add {{ questions_per_exam - questions|length }} more to reach a full {{ questions_per_exam }}-question test
+    {% else %}
+        &middot; <span class="text-success">ready for a full {{ questions_per_exam }}-question exam</span>
+    {% endif %}
+</p>
+
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item"><a class="nav-link" href="#manual-section"><i class="bi bi-pencil-square"></i> Jump to: Add Manually</a></li>
+    <li class="nav-item"><a class="nav-link" href="#upload-section"><i class="bi bi-upload"></i> Jump to: Upload File</a></li>
+</ul>
+
+<div class="row g-4 mb-4">
+    <!-- Manual question builder -->
+    <div class="col-lg-7" id="manual-section">
+        <div class="card p-3 h-100">
+            <h5><i class="bi bi-pencil-square"></i> 1. Add Question Manually</h5>
+            <p class="text-muted small mb-3">Build the test one question at a time. After you submit, the form clears so you can keep adding the next question.</p>
+            <form method="POST" action="{{ url_for('teacher_add_question', subject_id=subject.id) }}" enctype="multipart/form-data" novalidate>
+                {{ question_form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ question_form.question_text.label(class="form-label") }}
+                    {{ question_form.question_text(class="form-control", placeholder="e.g. What is 2 + 2?") }}
+                    {% for err in question_form.question_text.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ question_form.image.label(class="form-label") }}
+                    {{ question_form.image(class="form-control") }}
+                    <div class="form-text">Optional — attach a photo, diagram, or chart the question refers to (PNG, JPG, GIF, or WebP).</div>
+                    {% for err in question_form.image.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        {{ question_form.choice_a.label(class="form-label") }}
+                        {{ question_form.choice_a(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        {{ question_form.choice_b.label(class="form-label") }}
+                        {{ question_form.choice_b(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        {{ question_form.choice_c.label(class="form-label") }}
+                        {{ question_form.choice_c(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        {{ question_form.choice_d.label(class="form-label") }}
+                        {{ question_form.choice_d(class="form-control") }}
+                    </div>
+                </div>
+                <div class="mb-3" style="max-width: 220px;">
+                    {{ question_form.correct_answer.label(class="form-label") }}
+                    {{ question_form.correct_answer(class="form-select") }}
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Add Question</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- File upload -->
+    <div class="col-lg-5" id="upload-section">
+        <div class="card p-3 h-100">
+            <h5><i class="bi bi-upload"></i> 2. Or Upload a File</h5>
+            <div class="alert alert-info small">
+                <strong>Expected file format</strong> (.xlsx or .csv), header row required:
+                <table class="table table-sm table-bordered mt-2 mb-0 bg-white">
+                    <thead><tr><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Answer</th></tr></thead>
+                    <tbody>
+                        <tr><td>What is 2+2?</td><td>1</td><td>2</td><td>3</td><td>4</td><td>D</td></tr>
+                        <tr><td>Capital of France?</td><td>London</td><td>Paris</td><td>Rome</td><td>Berlin</td><td>B</td></tr>
+                    </tbody>
+                </table>
+                <div class="mt-2">The <code>Answer</code> column must contain exactly one letter: A, B, C, or D. You can upload 50, 100, or more rows at once.</div>
+            </div>
+            <form method="POST" action="{{ url_for('teacher_upload_questions', subject_id=subject.id) }}" enctype="multipart/form-data" novalidate>
+                {{ upload_form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ upload_form.file.label(class="form-label") }}
+                    {{ upload_form.file(class="form-control") }}
+                    {% for err in upload_form.file.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-upload"></i> Import Questions</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<h5 class="mb-3">Current Test Questions ({{ questions|length }})</h5>
+{% if questions %}
+<div class="accordion" id="questionAccordion">
+    {% for q in questions %}
+    <div class="card mb-2">
+        <div class="p-3 d-flex justify-content-between align-items-start">
+            <div>
+                <p class="fw-semibold mb-2">{{ loop.index }}. {{ q.question_text }}</p>
+                {% if q.image_filename %}
+                <img src="{{ url_for('static', filename='question_images/' + q.image_filename) }}" alt="Question image" class="img-fluid rounded mb-2" style="max-height: 180px;">
+                {% endif %}
+                <ul class="list-unstyled small mb-0">
+                    {% for letter, text in [('A', q.choice_a), ('B', q.choice_b), ('C', q.choice_c), ('D', q.choice_d)] %}
+                        <li class="{{ 'text-success fw-semibold' if letter == q.correct_answer else 'text-muted' }}">
+                            {{ letter }}. {{ text }} {% if letter == q.correct_answer %}<i class="bi bi-check-circle-fill"></i>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <form method="POST" action="{{ url_for('teacher_delete_question', subject_id=subject.id, question_id=q.id) }}"
+                  onsubmit="return confirm('Delete this question?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">No questions yet — add one above or upload a file to get started.</p>
+{% endif %}
+
+<a href="{{ url_for('admin_subjects') if current_user.is_admin() else url_for('teacher_dashboard') }}" class="btn btn-link mt-2">Back to Subjects</a>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-4">My Subjects</h3>
+
+<div class="row g-4 mb-4">
+    {% for s in subjects %}
+    <div class="col-md-4">
+        <div class="card h-100 p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <h5>{{ s.name }}</h5>
+                <span class="badge bg-secondary">{{ s.level_label() }}</span>
+            </div>
+            <p class="text-muted small">{{ s.description or '' }}</p>
+            <ul class="list-unstyled small text-muted">
+                <li><i class="bi bi-question-circle"></i> {{ s.question_count() }} question(s) available</li>
+                <li><i class="bi bi-check2-square"></i> Passing score: {{ s.passing_score }}%</li>
+                <li><i class="bi bi-clock"></i> Time limit: {{ s.time_limit_minutes }} min</li>
+            </ul>
+            {% if s.question_count() > 0 %}
+            <a href="{{ url_for('student_take_exam', subject_id=s.id) }}" class="btn btn-primary mt-auto">Take Exam</a>
+            {% else %}
+            <button class="btn btn-secondary mt-auto" disabled>No questions yet</button>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info mb-0">
+            <i class="bi bi-info-circle"></i> You're not enrolled in any subjects yet.
+            Ask your teacher or the school administrator to enroll you — students can't
+            self-enroll.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<h4 class="mb-3">Recent Results</h4>
+<div class="card p-3">
+    <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Subject</th><th>Score</th><th>%</th><th>Result</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for a in recent_attempts %}
+            <tr>
+                <td>{{ a.subject.name }}</td>
+                <td>{{ a.score }} / {{ a.total }}</td>
+                <td>{{ a.percentage }}%</td>
+                <td>{% if a.passed %}<span class="badge bg-success">PASSED</span>{% else %}<span class="badge bg-danger">FAILED</span>{% endif %}</td>
+                <td>{{ a.taken_at.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="5" class="text-muted text-center">No exams taken yet.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

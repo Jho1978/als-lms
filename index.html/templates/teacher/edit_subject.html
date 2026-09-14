@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Edit Subject{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h4 class="mb-1">Edit Subject &mdash; {{ subject.name }}</h4>
+            <p class="text-muted small mb-3">Changing the time limit resets the exam timer for every future attempt (students already have a fresh full-length timer each time they take or retake the exam — this changes how long that timer runs).</p>
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-2">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="2") }}
+                </div>
+                <div class="mb-2">
+                    {{ form.level.label(class="form-label") }}
+                    {{ form.level(class="form-select") }}
+                </div>
+                {% if form.teacher_id %}
+                <div class="mb-2">
+                    {{ form.teacher_id.label(class="form-label") }}
+                    {{ form.teacher_id(class="form-select") }}
+                </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        {{ form.passing_score.label(class="form-label") }}
+                        {{ form.passing_score(class="form-control") }}
+                    </div>
+                    <div class="col-6 mb-3">
+                        {{ form.time_limit_minutes.label("Exam Timer (minutes)", class="form-label") }}
+                        {{ form.time_limit_minutes(class="form-control") }}
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100" type="submit"><i class="bi bi-save"></i> Save Changes</button>
+            </form>
+            <a href="{{ url_for('admin_subjects') if current_user.is_admin() else url_for('teacher_dashboard') }}" class="btn btn-link mt-2">Cancel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

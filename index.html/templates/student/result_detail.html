@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Result Detail{% endblock %}
+{% block content %}
+<div class="row justify-content-center mb-4">
+    <div class="col-md-6">
+        <div class="card text-center p-4 {{ 'border-success' if attempt.passed else 'border-danger' }}">
+            <h5 class="text-muted">{{ attempt.subject.name }} &mdash; Your Result</h5>
+            <h1 class="display-4 fw-bold">{{ attempt.score }} / {{ attempt.total }}</h1>
+            <h3>{{ attempt.percentage }}% <span class="badge bg-dark fs-6 align-middle">Grade: {{ attempt.letter_grade() }}</span></h3>
+            {% if attempt.passed %}
+                <span class="badge bg-success fs-6 mt-2">PASSED</span>
+            {% else %}
+                <span class="badge bg-danger fs-6 mt-2">FAILED</span>
+            {% endif %}
+            <p class="text-muted small mt-3 mb-0">Taken on {{ attempt.taken_at.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+    </div>
+</div>
+
+<h5>Answer Review</h5>
+{% for ans in attempt.answers %}
+    <div class="card p-3 mb-2 {{ 'border-success' if ans.is_correct else 'border-danger' }}">
+        <p class="fw-semibold mb-2">{{ loop.index }}. {{ ans.question.question_text }}</p>
+        {% if ans.question.image_filename %}
+        <img src="{{ url_for('static', filename='question_images/' + ans.question.image_filename) }}" alt="Question image" class="img-fluid rounded mb-2" style="max-height: 250px;">
+        {% endif %}
+        <p class="small mb-1">Your answer: <strong>{{ ans.selected_answer or 'No answer' }}</strong> &mdash;
+            {% if ans.is_correct %}<span class="text-success">Correct</span>{% else %}<span class="text-danger">Incorrect</span>{% endif %}
+        </p>
+        {% if not ans.is_correct %}
+        <p class="small text-muted mb-0">Correct answer: <strong>{{ ans.question.correct_answer }}</strong> &mdash; {{ ans.question.choices()[ans.question.correct_answer] }}</p>
+        {% endif %}
+    </div>
+{% endfor %}
+
+<a href="{{ url_for('student_results') }}" class="btn btn-link">Back to Results History</a>
+{% endblock %}

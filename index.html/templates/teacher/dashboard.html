@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="mb-0">My Subjects</h3>
+    <a href="{{ url_for('teacher_create_subject') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> New Subject</a>
+</div>
+
+<div class="row g-4">
+    {% for s in subjects %}
+    <div class="col-md-4">
+        <div class="card h-100 p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <h5>{{ s.name }}</h5>
+                <span class="badge bg-secondary">{{ s.level_label() }}</span>
+            </div>
+            <p class="text-muted small">{{ s.description or 'No description provided.' }}</p>
+            <ul class="list-unstyled small text-muted">
+                <li><i class="bi bi-question-circle"></i> {{ s.question_count() }} question(s)</li>
+                <li><i class="bi bi-check2-square"></i> Passing score: {{ s.passing_score }}%</li>
+                <li><i class="bi bi-clock"></i> Time limit: {{ s.time_limit_minutes }} min</li>
+            </ul>
+            <div class="d-flex gap-2 mt-2 flex-wrap">
+                <a href="{{ url_for('teacher_manage_questions', subject_id=s.id) }}" class="btn btn-sm btn-outline-primary flex-fill">Manage Questions</a>
+                <a href="{{ url_for('subject_manage_enrollment', subject_id=s.id) }}" class="btn btn-sm btn-outline-success flex-fill">Enroll Students</a>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+                <a href="{{ url_for('teacher_subject_results', subject_id=s.id) }}" class="btn btn-sm btn-outline-secondary flex-fill">Results</a>
+                <a href="{{ url_for('subject_edit', subject_id=s.id) }}" class="btn btn-sm btn-outline-dark flex-fill"><i class="bi bi-gear"></i> Edit / Timer</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-muted">You haven't created any subjects yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

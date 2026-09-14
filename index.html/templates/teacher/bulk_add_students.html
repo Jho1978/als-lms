@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Bulk Add Students{% endblock %}
+{% block content %}
+<h3 class="mb-1">Bulk Add Students</h3>
+<p class="text-muted mb-4">Paste a list of student names — one per line — and the system creates an account for each one automatically, with a ready-made username and temporary password.</p>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card p-3">
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="mb-3">
+                    {{ form.names.label(class="form-label") }}
+                    {{ form.names(class="form-control", style="font-family: monospace;") }}
+                    <div class="form-text">One student per line, e.g. "Maria Santos". You can paste a whole class roster at once.</div>
+                    {% for err in form.names.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+                </div>
+                <div class="mb-3">
+                    {{ form.grade_level.label(class="form-label") }}
+                    {{ form.grade_level(class="form-select") }}
+                </div>
+                <div class="mb-3">
+                    {{ form.subject_id.label(class="form-label") }}
+                    {{ form.subject_id(class="form-select") }}
+                    <div class="form-text">If you pick a subject, every student created below is enrolled in it immediately.</div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-people-fill"></i> Create Accounts</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        {% if results %}
+        <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Results</h5>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="downloadCsvBtn"><i class="bi bi-download"></i> Download as CSV</button>
+            </div>
+            <div class="alert alert-warning small">
+                <i class="bi bi-exclamation-triangle"></i> These temporary passwords are shown <strong>only once</strong>. Copy or download this list now — students should change their password after logging in.
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle" id="resultsTable">
+                    <thead><tr><th>Name</th><th>Username</th><th>Temp Password</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {% for r in results %}
+                        <tr>
+                            <td>{{ r.name }}</td>
+                            <td>{{ r.username or '—' }}</td>
+                            <td><code>{{ r.password or '—' }}</code></td>
+                            <td>
+                                {% if r.status == 'created' %}
+                                    <span class="badge bg-success">Created</span>
+                                {% else %}
+                                    <span class="badge bg-secondary" title="{{ r.reason }}">Skipped</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="card p-4 text-muted small">
+            <p class="mb-2"><i class="bi bi-info-circle"></i> How usernames and passwords are generated:</p>
+            <ul class="mb-0">
+                <li>Username: first initial + last name (e.g. "Maria Santos" → <code>msantos</code>). If that's taken, a number is added automatically (<code>msantos2</code>).</li>
+                <li>Password: a random 8-character temporary password, shown once in the results so you can hand it to the student.</li>
+                <li>Duplicate or blank lines are skipped automatically and listed as "Skipped" instead of stopping the whole batch.</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.getElementById("downloadCsvBtn")?.addEventListener("click", function () {
+    const rows = [["Name", "Username", "Temporary Password", "Status"]];
+    document.querySelectorAll("#resultsTable tbody tr").forEach(function (tr) {
+        const cells = Array.from(tr.querySelectorAll("td")).map(td => td.innerText.trim());
+        rows.push(cells);
+    });
+    const csv = rows.map(r => r.map(v => '"' + v.replace(/"/g, '""') + '"').join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "new_student_accounts.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+});
+</script>
+{% endblock %}

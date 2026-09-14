@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h3 class="mb-4">Admin Dashboard</h3>
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3">
+            <i class="bi bi-person-workspace fs-2 text-primary"></i>
+            <h3>{{ teacher_count }}</h3>
+            <p class="text-muted mb-0">Teachers</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3">
+            <i class="bi bi-people-fill fs-2 text-primary"></i>
+            <h3>{{ student_count }}</h3>
+            <p class="text-muted mb-0">Students</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3">
+            <i class="bi bi-journal-bookmark-fill fs-2 text-primary"></i>
+            <h3>{{ subject_count }}</h3>
+            <p class="text-muted mb-0">Subjects</p>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card text-center p-3">
+            <i class="bi bi-clipboard-check-fill fs-2 text-primary"></i>
+            <h3>{{ attempt_count }}</h3>
+            <p class="text-muted mb-0">Exams Taken</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <a href="{{ url_for('admin_teachers') }}" class="btn btn-outline-primary w-100 py-3"><i class="bi bi-person-plus"></i> Manage Teachers</a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin_students') }}" class="btn btn-outline-primary w-100 py-3"><i class="bi bi-person-plus"></i> Manage Students</a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin_subjects') }}" class="btn btn-outline-primary w-100 py-3"><i class="bi bi-journal-plus"></i> Manage Subjects</a>
+    </div>
+    <div class="col-md-3">
+        <a href="{{ url_for('admin_results') }}" class="btn btn-outline-primary w-100 py-3"><i class="bi bi-bar-chart"></i> View All Results</a>
+    </div>
+</div>
+{% endblock %}

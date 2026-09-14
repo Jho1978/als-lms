@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="hero text-center mb-5">
+    <h1 class="display-5 fw-bold"><i class="bi bi-mortarboard-fill"></i> Campus LMS</h1>
+    <p class="lead mb-4">Enroll in subjects, take auto-graded multiple choice exams, and track your progress — all in one place.</p>
+    {% if not current_user.is_authenticated %}
+    <a href="{{ url_for('login') }}" class="btn btn-light btn-lg me-2">Login</a>
+    <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg">Sign Up as Student</a>
+    {% endif %}
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card stat-card text-center p-4">
+            <i class="bi bi-journal-bookmark-fill fs-1 text-primary"></i>
+            <h2 class="mt-2">{{ subject_count }}</h2>
+            <p class="text-muted mb-0">Subjects Available</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-center p-4">
+            <i class="bi bi-person-workspace fs-1 text-primary"></i>
+            <h2 class="mt-2">{{ teacher_count }}</h2>
+            <p class="text-muted mb-0">Teachers</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card stat-card text-center p-4">
+            <i class="bi bi-people-fill fs-1 text-primary"></i>
+            <h2 class="mt-2">{{ student_count }}</h2>
+            <p class="text-muted mb-0">Students</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 p-3">
+            <h5><i class="bi bi-shield-lock text-primary"></i> Admin</h5>
+            <p class="text-muted small">Creates teacher &amp; student accounts, manages subjects, and reviews all exam results across the school.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 p-3">
+            <h5><i class="bi bi-person-video2 text-primary"></i> Teacher</h5>
+            <p class="text-muted small">Creates subjects, uploads a 50-question Excel/CSV questionnaire, sets the passing score, and reviews student scores.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 p-3">
+            <h5><i class="bi bi-person-check text-primary"></i> Student</h5>
+            <p class="text-muted small">Enrolls in subjects, takes timed multiple-choice exams, and gets an instant, auto-graded score.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

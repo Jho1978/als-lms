@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Exam - {{ subject.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 sticky-top bg-light py-2" style="top:56px; z-index: 5;">
+    <h4 class="mb-0">{{ subject.name }} Exam</h4>
+    <div class="text-end">
+        <div class="small text-muted">Time Remaining</div>
+        <div id="exam-timer" class="fs-4 fw-bold text-primary">--:--</div>
+    </div>
+</div>
+<p class="text-muted">{{ display_questions|length }} questions &middot; Passing score: {{ subject.passing_score }}% &middot; Answer all questions then submit.</p>
+
+<form method="POST" id="exam-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    {% for item in display_questions %}
+        {% set q = item.question %}
+        <div class="card question-card p-3 mb-3">
+            <input type="hidden" name="question_ids" value="{{ q.id }}">
+            <p class="fw-semibold mb-2">{{ loop.index }}. {{ q.question_text }}</p>
+            {% if q.image_filename %}
+            <img src="{{ url_for('static', filename='question_images/' + q.image_filename) }}" alt="Question image" class="img-fluid rounded mb-3" style="max-height: 350px;">
+            {% endif %}
+            {% for letter, text in item.options %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="answer_{{ q.id }}" id="q{{ q.id }}_{{ letter }}" value="{{ letter }}" required>
+                    <label class="form-check-label" for="q{{ q.id }}_{{ letter }}">{{ text }}</label>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary btn-lg w-100 mb-5">Submit Exam</button>
+</form>
+
+<script>
+(function () {
+    let totalSeconds = {{ subject.time_limit_minutes }} * 60;
+    const timerEl = document.getElementById("exam-timer");
+    const form = document.getElementById("exam-form");
+    let autoSubmitted = false;
+
+    function render() {
+        const m = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+        const s = (totalSeconds % 60).toString().padStart(2, "0");
+        timerEl.textContent = m + ":" + s;
+        if (totalSeconds <= 60) {
+            timerEl.classList.remove("text-primary");
+            timerEl.classList.add("text-danger");
+        }
+    }
+    render();
+
+    const interval = setInterval(function () {
+        totalSeconds -= 1;
+        render();
+        if (totalSeconds <= 0 && !autoSubmitted) {
+            autoSubmitted = true;
+            clearInterval(interval);
+            form.submit();
+        }
+    }, 1000);
+
+    form.addEventListener("submit", function () {
+        clearInterval(interval);
+    });
+})();
+</script>
+{% endblock %}
